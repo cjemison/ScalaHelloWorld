@@ -27,7 +27,6 @@ class MessageActor extends Actor {
 
 class HelloActor(messageActor: ActorRef) extends Actor {
   def receive = {
-
     case message: HelloMessage => {
       implicit val timeout = Timeout(5 seconds);
       val future = messageActor ? message
