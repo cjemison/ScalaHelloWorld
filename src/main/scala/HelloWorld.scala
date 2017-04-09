@@ -44,9 +44,7 @@ class HelloActor(messageActor: ActorRef) extends Actor {
 }
 
 object Main extends App {
-  val system = ActorSystem("HelloSystem")
-  implicit val timeout = Timeout(5 seconds)
-
+  val system = ActorSystem("HelloSystem");
   val messageActor = system.actorOf(Props[MessageActor], name = "messageActor")
   val helloActor = system.actorOf(Props(new HelloActor(messageActor)), name = "helloActor")
 
