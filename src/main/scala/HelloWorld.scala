@@ -2,17 +2,17 @@
   * Created by cjemison on 4/8/17.
   */
 
-import akka.pattern.ask
 import akka.actor._
+import akka.pattern.ask
 import akka.util.Timeout
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class HelloMessage(val name: String)
-
 class GoodByeMessage(val name: String)
+
 
 class MessageActor extends Actor {
   def receive = {
@@ -25,30 +25,33 @@ class MessageActor extends Actor {
   }
 }
 
-class HelloActor(messageActor:ActorRef) extends Actor {
+class HelloActor(messageActor: ActorRef) extends Actor {
   def receive = {
-    // (2) changed these println statements
+
     case message: HelloMessage => {
-      implicit val timeout = Timeout(5 seconds)
+      implicit val timeout = Timeout(5 seconds);
       val future = messageActor ? message
       val result = Await.result(future, timeout.duration).asInstanceOf[String]
       println(result)
     }
     case message: GoodByeMessage => {
-      messageActor ! message
+      implicit val timeout = Timeout(5 seconds);
+      val future = messageActor ? message
+      val result = Await.result(future, timeout.duration).asInstanceOf[String]
+      println(result)
     }
   }
 }
 
 object Main extends App {
   val system = ActorSystem("HelloSystem")
-
+  implicit val timeout = Timeout(5 seconds)
 
   val messageActor = system.actorOf(Props[MessageActor], name = "messageActor")
   val helloActor = system.actorOf(Props(new HelloActor(messageActor)), name = "helloActor")
 
   helloActor ! new HelloMessage("Cornelius")
- // helloActor ! new GoodByeMessage("Cornelius")
-  //helloActor ! PoisonPill
+  helloActor ! new GoodByeMessage("Cornelius")
+  helloActor ! PoisonPill
   system.terminate()
 }
